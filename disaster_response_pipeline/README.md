@@ -13,19 +13,21 @@ It includes three components
 
 ## File Descriptions
 
-.
-├── app
-│   ├── run.py 						# Flask app start point
-│   └── templates
-│       ├── go.html 				# Classification result web page
-│       └── master.html 			# Main page of web app
-├── data
-│   ├── disaster_categories.csv 	# Source Dataset for categories
-│   ├── disaster_messages.csv 		# Source Dataset for messages
-│   └── process_data.py 			# ETL pipeline code
-├── models
-│   └── train_classifier.py 		# Message classifier training code
-└── README.md
+```
+	.
+	├── app
+	│   ├── run.py 						# Flask app start point
+	│   └── templates
+	│       ├── go.html 				# Classification result web page
+	│       └── master.html 			# Main page of web app
+	├── data
+	│   ├── disaster_categories.csv 	# Source Dataset for categories
+	│   ├── disaster_messages.csv 		# Source Dataset for messages
+	│   └── process_data.py 			# ETL pipeline code
+	├── models
+	│   └── train_classifier.py 		# Message classifier training code
+	└── README.md
+```
 
 
 ## Instructions
