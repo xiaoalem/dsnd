@@ -35,14 +35,15 @@ def clean_data(df):
     row = categories.iloc[0]
     category_colnames = row.apply(lambda x: x.split("-")[0])
     categories.columns = category_colnames
+    categories.related.loc[categories.related == 'related-2'] = 'related-1'
     for column in categories:
         # set each value to be the last character of the string
         categories[column] = categories[column].apply(lambda x: x.split('-')[-1])
         # convert column from string to numeric
         categories[column] = categories[column].apply(lambda x: int(x))
     df.drop("categories", axis=1, inplace=True)
-    df = df.join(categories)
-    df.drop_duplicates(inplace = True)
+    df = pd.concat([df, categories], axis = 1)
+    df.drop_duplicates(subset="id", inplace=True)
     return df
 
 
@@ -55,7 +56,7 @@ def save_data(df, database_filename):
         database_filename: filename of SQLite database (to save as)
     '''
     engine = create_engine(f"sqlite:///{database_filename}")
-    df.to_sql("DisasterResponse", engine, index=False)
+    df.to_sql("DisasterResponse", engine, index=False, if_exists="replace")
 
 
 def main():
@@ -74,6 +75,10 @@ def main():
         save_data(df, database_filepath)
         
         print('Cleaned data saved to database!')
+        
+        print('Some example data')
+        print(df.head(20))
+        
     
     else:
         print('Please provide the filepaths of the messages and categories '\

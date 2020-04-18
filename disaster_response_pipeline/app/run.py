@@ -1,6 +1,7 @@
 import json
 import plotly
 import pandas as pd
+import pickle
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -15,15 +16,21 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
-    tokens = word_tokenize(text)
+    '''
+    Tokenize input text.
+    
+    Parameters:
+        text: input text
+    
+    Returns:
+        tokens: tokens from the text
+    '''
     lemmatizer = WordNetLemmatizer()
+    tokens = word_tokenize(text)
+    tokens = [lemmatizer.lemmatize(t).lower().strip() for t in tokens]
+    print(tokens)
+    return tokens
 
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
 
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
@@ -31,7 +38,6 @@ df = pd.read_sql_table('DisasterResponse', engine)
 
 # load model
 model = joblib.load("../models/classifier.pkl")
-
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -42,8 +48,12 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
         
-    top_category_df = df.iloc[:,5:].sum().sort_values(ascending=False).head(10)
-    top_category_names = list(top_category_df.index)
+    top_category_sums = df.iloc[:,5:].sum().sort_values(ascending=False).head(10)
+    top_category_sums_names = list(top_category_sums.index)
+    
+    top_category_means = df.iloc[:,5:].mean().sort_values(ascending=False).head(10)
+    top_category_means_names = list(top_category_means.index)
+
     
     # create visuals
     graphs = [
@@ -68,18 +78,36 @@ def index():
         {
             'data': [
                 Bar(
-                    x=top_category_names,
-                    y=top_category_df
+                    x=top_category_sums_names,
+                    y=top_category_sums
                 )
             ],
 
             'layout': {
-                'title': 'Top 10 Message Categories',
+                'title': 'Top 10 Message Categories (Count)',
                 'yaxis': {
-                    'title': "Counts"
+                    'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Categories"
+                    'title': "Category"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=top_category_means_names,
+                    y=top_category_means
+                )
+            ],
+
+            'layout': {
+                'title': 'Top 10 Message Categories (Prevalence Percentage)',
+                'yaxis': {
+                    'title': "Prevalence Percentage"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
